@@ -169,6 +169,7 @@ while running:
     if playerX <= 10 or playerX >= 726:
         change_playerX *= -1
 
+
     # Bullet Movement
     if bulletY <= 0:
         bulletY = 480
