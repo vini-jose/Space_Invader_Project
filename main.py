@@ -1,0 +1,1 @@
+print('ta ai tua mundança fdp')
