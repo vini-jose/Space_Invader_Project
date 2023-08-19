@@ -45,6 +45,26 @@ mudanca_posicao_jogadorX = 0
 def jogador(x, y):
     SCREEN.blit(imagem_jogador, (x, y))
 
+# Boss
+imagem_boss = []
+posicao_bossX = []
+posicao_bossY = []
+mudanca_posicao_bossX = []
+mudanca_posicao_bossY = []
+boss_destruido= []
+num_boss = 1
+
+for i in range(num_boss):
+    imagem_boss.append(pygame.image.load("imagens\\boss.png"))
+    posicao_bossX.append(randint(0, 735))
+    posicao_bossY.append(randint(50, 150))
+    mudanca_posicao_bossX.append(1)
+    mudanca_posicao_bossY.append(40)
+    boss_destruido.append(False)
+
+def boss(x, y):
+    SCREEN.blit(imagem_boss[i], (x, y))
+    
 # Alien
 imagem_alien = []
 posicao_alienX = []
@@ -102,6 +122,26 @@ while executando:
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
             executando = False
+
+    # Gerando o Boss
+    for i in range(num_boss):
+        # Fim de Jogo
+        if posicao_bossY[i] > 440:
+            for j in range(num_boss):
+                posicao_bossY[j] = 9999
+            texto_fim_de_jogo()
+            break
+
+        posicao_bossX[i] += mudanca_posicao_bossX[i]
+
+        if posicao_bossX[i] > 736:
+            mudanca_posicao_bossX[i] *= -1
+            posicao_bossX[i] = 736
+            posicao_bossY[i] += mudanca_posicao_bossY[i]
+        elif posicao_bossX[i] < 0:
+            mudanca_posicao_bossX[i] *= -1
+            posicao_bossX[i] = 0
+            posicao_bossY[i] += mudanca_posicao_bossY[i]
 
     # Gerando inimigos
     for i in range(num_alienigenas):
