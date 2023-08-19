@@ -123,25 +123,7 @@ while executando:
         if evento.type == pygame.QUIT:
             executando = False
 
-    # Gerando o Boss
-    for i in range(num_boss):
-        # Fim de Jogo
-        if posicao_bossY[i] > 440:
-            for j in range(num_boss):
-                posicao_bossY[j] = 9999
-            texto_fim_de_jogo()
-            break
-
-        posicao_bossX[i] += mudanca_posicao_bossX[i]
-
-        if posicao_bossX[i] > 736:
-            mudanca_posicao_bossX[i] *= -1
-            posicao_bossX[i] = 736
-            posicao_bossY[i] += mudanca_posicao_bossY[i]
-        elif posicao_bossX[i] < 0:
-            mudanca_posicao_bossX[i] *= -1
-            posicao_bossX[i] = 0
-            posicao_bossY[i] += mudanca_posicao_bossY[i]
+    
 
     # Gerando inimigos
     for i in range(num_alienigenas):
