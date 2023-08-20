@@ -1,191 +1,155 @@
 import pygame
-import math
-import os
-from random import randint
+import random
 
-# Inicializando o pygame
 pygame.init()
-FPS = 120
-CLOCK = pygame.time.Clock()
 
-# Criando a tela
-SCREEN = pygame.display.set_mode((800, 600))
+x = 1280
+y = 720
 
-# PLANO DE FUNDO
-BACKGROUND = pygame.image.load(os.path.join("imagens", "background.png"))
-
-# Título e ícone
+screen = pygame.display.set_mode((x, y))
 pygame.display.set_caption("Space Invader")
-ICON = pygame.image.load(os.path.join("imagens", "ufo.png"))
-pygame.display.set_icon(ICON)
 
-# Pontuação
-valor_pontuacao = 0
-FONT = pygame.font.Font("freesansbold.ttf", 32)
-TEST_X = 10
-TEST_Y = 10
+bg = pygame.image.load("imagens/background.png").convert_alpha()
+bg = pygame.transform.scale(bg, (x, y))
 
-def mostrar_pontuacao(x, y):
-    pontuacao = FONT.render("Pontuação: " + str(valor_pontuacao), True, (255, 255, 255))
-    SCREEN.blit(pontuacao, (x, y))
+alien = pygame.image.load("imagens/alien.png").convert_alpha()
+alien = pygame.transform.scale(alien, (120, 120))
 
-# Fim de jogo
-FIM_DE_JOGO_FONT = pygame.font.Font("freesansbold.ttf", 64)
+playerImg = pygame.image.load("imagens/spaceship.png").convert_alpha()
+playerImg = pygame.transform.scale(playerImg, (90, 90)) # conversão do tamanho da nave
+playerImg = pygame.transform.rotate(playerImg, -90)
 
-def texto_fim_de_jogo():
-    fim_de_jogo = FIM_DE_JOGO_FONT.render("FIM DE JOGO", True, (255, 255, 255))
-    SCREEN.blit(fim_de_jogo, (200, 250))
+boss = pygame.image.load("imagens/boss.png").convert_alpha()
+boss = pygame.transform.scale(boss, (100, 100))
 
-# Jogador
-imagem_jogador = pygame.image.load(os.path.join("imagens", "spaceship.png"))
-posicao_jogadorX = 370
-posicao_jogadorY = 480
-mudanca_posicao_jogadorX = 0
+missil = pygame.image.load("imagens/bullet.png").convert_alpha()
+missil = pygame.transform.scale(missil, (40, 40))
+missil = pygame.transform.rotate(missil, -90)
 
-def jogador(x, y):
-    SCREEN.blit(imagem_jogador, (x, y))
+pos_alien_x = 500
+pos_alien_y = 360
 
-# Boss
-imagem_boss = []
-posicao_bossX = []
-posicao_bossY = []
-mudanca_posicao_bossX = []
-mudanca_posicao_bossY = []
-boss_destruido= []
-num_boss = 1
+pos_player_x = 200
+pos_player_y = 300
 
-for i in range(num_boss):
-    imagem_boss.append(pygame.image.load("imagens\\boss.png"))
-    posicao_bossX.append(randint(0, 735))
-    posicao_bossY.append(randint(50, 150))
-    mudanca_posicao_bossX.append(1)
-    mudanca_posicao_bossY.append(40)
-    boss_destruido.append(False)
+vel_missil_x = 0
+pos_missil_x = 200
+pos_missil_y = 300
 
-def boss(x, y):
-    SCREEN.blit(imagem_boss[i], (x, y))
-    
-# Alien
-imagem_alien = []
-posicao_alienX = []
-posicao_alienY = []
-mudanca_posicao_alienX = []
-mudanca_posicao_alienY = []
-alien_destruido = []
-num_alienigenas = 6
+pos_boss_x = 500 
+pos_boss_y = 360
 
-for i in range(num_alienigenas):
-    imagem_alien.append(pygame.image.load("imagens\\alien.png"))
-    posicao_alienX.append(randint(0, 735))
-    posicao_alienY.append(randint(50, 150))
-    mudanca_posicao_alienX.append(1)
-    mudanca_posicao_alienY.append(40)
-    alien_destruido.append(False)
+pontos = 3
 
-def alienigena(x, y):
-    SCREEN.blit(imagem_alien[i], (x, y))
+triggered = False
 
-# Bala
-imagem_bala = pygame.image.load("imagens\\bullet.png")
-posicao_balaX = 0
-posicao_balaY = 480
-mudanca_posicao_balaX = 0
-mudanca_posicao_balaY = 5
-estado_bala = "pronta"
+rodando = True
 
-def disparar_bala(x, y):
-    global estado_bala
-    estado_bala = "disparo"
-    SCREEN.blit(imagem_bala, (x + 16, y + 10))
+font = pygame.font.SysFont("", 50)
 
-def colisao(alienX, alienY, balaX, balaY):
-    distancia = math.sqrt(
-        (math.pow(alienX - balaX, 2)) + (math.pow(alienY - balaY, 2))
-    )
-    if distancia < 27:
+player_rect = playerImg.get_rect()
+alien_rect = alien.get_rect()
+missil_rect = missil.get_rect()
+
+# funções
+def respawn_alien():
+    x = 1350
+    y = random.randint(1, 640)
+    return [x, y]
+
+def respawn_missil():
+    triggered = False
+    respawn_missil_x = pos_player_x
+    respawn_missil_y = pos_player_y
+    vel_x_missil = 0
+    return [respawn_missil_x, respawn_missil_y, triggered, vel_x_missil]
+
+def colisions():
+    global pontos
+    if player_rect.colliderect(alien_rect) or alien_rect.x == 60:
+        pontos -= 1
         return True
-    return False
+    elif missil_rect.colliderect(alien_rect):
+        pontos += 1
+        return True
+    else:
+        return False
 
-# O programa principal
-executando = True
-while executando:
-    # Relógio
-    CLOCK.tick(FPS)
 
-    # RGB
-    SCREEN.fill((0, 0, 0))
-
-    # PLANO DE FUNDO
-    SCREEN.blit(BACKGROUND, (0, 0))
-
-    # Verifica se não foi pedido para sair
-    for evento in pygame.event.get():
-        if evento.type == pygame.QUIT:
-            executando = False
-
+while rodando:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            rodando = False
+            
+    screen.blit(bg, (0, 0))
     
-
-    # Gerando inimigos
-    for i in range(num_alienigenas):
-        # Fim de Jogo
-        if posicao_alienY[i] > 440:
-            for j in range(num_alienigenas):
-                posicao_alienY[j] = 9999
-            texto_fim_de_jogo()
-            break
-
-        posicao_alienX[i] += mudanca_posicao_alienX[i]
-
-        if posicao_alienX[i] > 736:
-            mudanca_posicao_alienX[i] *= -1
-            posicao_alienX[i] = 736
-            posicao_alienY[i] += mudanca_posicao_alienY[i]
-        elif posicao_alienX[i] < 0:
-            mudanca_posicao_alienX[i] *= -1
-            posicao_alienX[i] = 0
-            posicao_alienY[i] += mudanca_posicao_alienY[i]
-
-        # Colisão
-        colisao_ocorreu = colisao(posicao_alienX[i], posicao_alienY[i], posicao_balaX, posicao_balaY)
-        if colisao_ocorreu:
-            posicao_balaY = 480
-            estado_bala = "pronta"
-            posicao_alienX[i] = randint(0, 735)
-            posicao_alienY[i] = randint(50, 150)
-            valor_pontuacao += 1
-
-        alienigena(posicao_alienX[i], posicao_alienY[i])
-
-    # Jogador
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        mudanca_posicao_jogadorX = -2
-    if keys[pygame.K_RIGHT]:
-        mudanca_posicao_jogadorX = 2
-    if keys[pygame.K_SPACE] and estado_bala == "pronta":
-        posicao_balaX = posicao_jogadorX
-        disparar_bala(posicao_balaX, posicao_balaY)
-
-    if keys[pygame.K_UP]:
-        if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
-            mudanca_posicao_jogadorX = 1
-    posicao_jogadorX += mudanca_posicao_jogadorX
-
-    if posicao_jogadorX <= 10 or posicao_jogadorX >= 726:
-        mudanca_posicao_jogadorX *= -1
-
-    # Movimento da Bala
-    if posicao_balaY <= 0:
-        posicao_balaY = 480
-        estado_bala = "pronta"
-
-    if estado_bala == "disparo":
-        disparar_bala(posicao_balaX, posicao_balaY)
-        posicao_balaY -= mudanca_posicao_balaY
-
-    jogador(posicao_jogadorX, posicao_jogadorY)
-    mostrar_pontuacao(TEST_X, TEST_Y)
+    rel_x = x % bg.get_rect().width
+    screen.blit(bg, (rel_x - bg.get_rect().width,0))
+    if rel_x < 1200:
+        screen.blit(bg, (rel_x, 0))
+        
+    # teclas
+    tecla = pygame.key.get_pressed()
+    if tecla[pygame.K_UP] and pos_player_y > 1:
+        pos_player_y -= 1
+        
+        if not triggered:
+            pos_missil_y -= 1
+            
+    if tecla[pygame.K_DOWN] and pos_player_y < 665:
+        pos_player_y += 1
+        
+        if not triggered:
+            pos_missil_y += 1
+            
+    if tecla[pygame.K_SPACE]:
+        triggered = True
+        vel_missil_x = 2
+        
+    if pontos == -1:
+        rodando = False
+        
+    # respawn
+    if pos_alien_x == 50:
+        pos_alien_x = respawn_alien()[0]
+        pos_alien_y =respawn_alien()[1]
+        
+    if pos_missil_x == 1300:
+        pos_missil_x, pos_missil_y, triggered, vel_missil_x = respawn_missil()
+    
+    if pos_alien_x == 50 or colisions():
+        pos_alien_x = respawn_alien()[0]
+        pos_alien_y = respawn_alien()[1]
+    
+    # posições rect    
+    player_rect.x = pos_player_x
+    player_rect.y = pos_player_y
+    
+    missil_rect.x = pos_missil_x
+    missil_rect.y = pos_missil_y
+    
+    alien_rect.x = pos_alien_x
+    alien_rect.y = pos_alien_y
+    
+    # movimento
+    x -= 2
+    pos_alien_x -= 1
+    
+    pos_missil_x += vel_missil_x
+    
+    pygame.draw.rect(screen, (255, 0, 0), player_rect, 4)
+    pygame.draw.rect(screen, (255, 0, 0), missil_rect, 4)
+    pygame.draw.rect(screen, (255, 0, 0), alien_rect, 4)
+    
+    score = font.render(f"Pontos: {int(pontos)} ", True, (0, 0, 0))
+    screen.blit(score, (50, 50))
+    
+    # criar imagens
+    screen.blit(boss, (pos_boss_x, pos_boss_y))
+    screen.blit(alien, (pos_alien_x, pos_alien_y))
+    screen.blit(missil, (pos_missil_x, pos_missil_y))
+    screen.blit(playerImg, (pos_player_x, pos_player_y))
+    
+    print(pontos)
+    
     pygame.display.update()
-
-# Finaliza o pygame
-pygame.quit()
