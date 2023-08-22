@@ -1,48 +1,62 @@
 import pygame
 import random
-import time
 
+# Iniciando o pygame
 pygame.init()
 
 x = 1280
 y = 720
 
+# Criando o screen
 screen = pygame.display.set_mode((x, y))
 pygame.display.set_caption("Space Invader")
 
+# Backgraund
 bg = pygame.image.load("imagens/background.png").convert_alpha()
 bg = pygame.transform.scale(bg, (x, y))
 
+# Alien
 alien = pygame.image.load("imagens/alien.png").convert_alpha()
 alien = pygame.transform.scale(alien, (150, 150))
-
-playerImg = pygame.image.load("imagens/spaceship.png").convert_alpha()
-playerImg = pygame.transform.scale(playerImg, (90, 90)) # conversão do tamanho da nave
-playerImg = pygame.transform.rotate(playerImg, -90)
-
-boss = pygame.image.load("imagens/boss.png").convert_alpha()
-boss = pygame.transform.scale(boss, (200, 200))
-
-missil = pygame.image.load("imagens/bullet.png").convert_alpha()
-missil = pygame.transform.scale(missil, (40, 40))
-missil = pygame.transform.rotate(missil, -90)
 
 pos_alien_x = 500
 pos_alien_y = 360
 alien_visivel = True
 
+alien_rect = alien.get_rect()
+
+# Player
+playerImg = pygame.image.load("imagens/spaceship.png").convert_alpha()
+playerImg = pygame.transform.scale(playerImg, (90, 90)) # conversão do tamanho da nave
+playerImg = pygame.transform.rotate(playerImg, -90)
+
 pos_player_x = 200
 pos_player_y = 300
 vida_player = 4
 
-vel_missil_x = 0
-pos_missil_x = 200
-pos_missil_y = 300
+player_rect = playerImg.get_rect()
+
+# Boss
+boss = pygame.image.load("imagens/boss.png").convert_alpha()
+boss = pygame.transform.scale(boss, (200, 200))
 
 pos_boss_x = 1000
 pos_boss_y = 360
 direcao_boss = -1
 vida_boss = 5
+
+boss_rect = boss.get_rect()
+
+# Missil
+missil = pygame.image.load("imagens/bullet.png").convert_alpha()
+missil = pygame.transform.scale(missil, (40, 40))
+missil = pygame.transform.rotate(missil, -90)
+
+vel_missil_x = 0
+pos_missil_x = 200
+pos_missil_y = 300
+
+missil_rect = missil.get_rect()
 
 pontos = 0
 
@@ -51,11 +65,6 @@ triggered = False
 rodando = True
 
 font = pygame.font.SysFont("", 50)
-
-player_rect = playerImg.get_rect()
-alien_rect = alien.get_rect()
-missil_rect = missil.get_rect()
-boss_rect = boss.get_rect()
 
 # funções
 def respawn_alien():
@@ -71,7 +80,7 @@ def respawn_missil():
     vel_x_missil = 0
     return [respawn_missil_x, respawn_missil_y, triggered, vel_x_missil]
 
-# Colição
+# ColiçãoS
 def colisao_alien():
     global vida_player, pontos
     if player_rect.colliderect(alien_rect) or alien_rect.x == 60:
@@ -126,13 +135,12 @@ while rodando:
         pos_alien_y = respawn_alien()[1]
     if alien_visivel:
         screen.blit(alien, (pos_alien_x, pos_alien_y))
-        pygame.draw.rect(screen, (255, 0, 0), alien_rect, 4)
-      
-    # Boss Visivel  
+        
+        
     if pontos >= 3:
         screen.blit(boss, (pos_boss_x, pos_boss_y))
-        pygame.draw.rect(screen, (255, 0, 0), boss_rect, 4)
         
+            
    # Alien Invisivel
     if pontos >= 3:
         pos_alien_x = respawn_alien()[0]
@@ -167,21 +175,20 @@ while rodando:
     # Movimento do missil
     pos_missil_x += vel_missil_x
     
-    
-    pygame.draw.rect(screen, (255, 0, 0), player_rect, 4)
-    pygame.draw.rect(screen, (255, 0, 0), missil_rect, 4)
-    
-    
     # Pontos
-    score = font.render(f"Pontos: {int(pontos)} ", True, (255, 0, 0))
-    screen.blit(score, (25, 25))
+    score_ponto = font.render(f"Pontos: {int(pontos)} ", True, (255, 0, 0))
+    screen.blit(score_ponto, (25, 25))
     
     # Vida_player
-    score = font.render(f"Vidas: {int(vida_player)}", True, (255, 0, 0))
-    screen.blit(score, (25, 65))
+    score_vida_player = font.render(f"Vida: {int(vida_player)}", True, (255, 0, 0))
+    screen.blit(score_vida_player, (25, 65))
     
+    # Vida_boss
+    if pontos >= 3:
+        score_vida_boss = font.render(f"Vida Boss: {int(vida_boss)}", True, (255, 0, 0))
+        screen.blit(score_vida_boss, (550, 25))
+        
     # criar imagens
-    
     screen.blit(missil, (pos_missil_x, pos_missil_y))
     screen.blit(playerImg, (pos_player_x, pos_player_y))
     
