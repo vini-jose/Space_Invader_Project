@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 
 pygame.init()
 
@@ -28,6 +29,7 @@ missil = pygame.transform.rotate(missil, -90)
 
 pos_alien_x = 500
 pos_alien_y = 360
+alien_visivel = True
 
 pos_player_x = 200
 pos_player_y = 300
@@ -40,6 +42,7 @@ pos_missil_y = 300
 pos_boss_x = 1000
 pos_boss_y = 360
 direcao_boss = -1
+vida_boss = 5
 
 pontos = 0
 
@@ -59,7 +62,7 @@ def respawn_alien():
     x = 1350
     y = random.randint(1, 640)
     return [x, y]
-
+    
 # Respawn do missil
 def respawn_missil():
     triggered = False
@@ -69,14 +72,14 @@ def respawn_missil():
     return [respawn_missil_x, respawn_missil_y, triggered, vel_x_missil]
 
 # Colição
-def colisions():
+def colisao_alien():
     global vida_player, pontos
     if player_rect.colliderect(alien_rect) or alien_rect.x == 60:
         vida_player -= 1
         return True
     elif missil_rect.colliderect(alien_rect):
         pontos += 1
-        return True
+        return True  
     else:
         return False
 
@@ -113,21 +116,29 @@ while rodando:
         
     if pontos == -1:
         rodando = False
-        
-    # Boss
-    if pontos >= 10:
-        screen.blit(boss, (pos_boss_x, pos_boss_y))
-        pygame.draw.rect(screen, (255, 0, 0), boss_rect, 4)
-        
-        
+    
     # Respawn
     if pos_missil_x == 1300:
         pos_missil_x, pos_missil_y, triggered, vel_missil_x = respawn_missil()
     
-    if pos_alien_x == 50 or colisions():
+    if pos_alien_x == 50 or colisao_alien():
         pos_alien_x = respawn_alien()[0]
         pos_alien_y = respawn_alien()[1]
-    
+    if alien_visivel:
+        screen.blit(alien, (pos_alien_x, pos_alien_y))
+        pygame.draw.rect(screen, (255, 0, 0), alien_rect, 4)
+      
+    # Boss Visivel  
+    if pontos >= 3:
+        screen.blit(boss, (pos_boss_x, pos_boss_y))
+        pygame.draw.rect(screen, (255, 0, 0), boss_rect, 4)
+        
+   # Alien Invisivel
+    if pontos >= 3:
+        pos_alien_x = respawn_alien()[0]
+        pos_alien_y = respawn_alien()[1]
+        alien_visivel = False
+        
     # Posições rect    
     player_rect.x = pos_player_x
     player_rect.y = pos_player_y
@@ -159,7 +170,7 @@ while rodando:
     
     pygame.draw.rect(screen, (255, 0, 0), player_rect, 4)
     pygame.draw.rect(screen, (255, 0, 0), missil_rect, 4)
-    pygame.draw.rect(screen, (255, 0, 0), alien_rect, 4)
+    
     
     # Pontos
     score = font.render(f"Pontos: {int(pontos)} ", True, (255, 0, 0))
@@ -170,10 +181,8 @@ while rodando:
     screen.blit(score, (25, 65))
     
     # criar imagens
-    screen.blit(alien, (pos_alien_x, pos_alien_y))
+    
     screen.blit(missil, (pos_missil_x, pos_missil_y))
     screen.blit(playerImg, (pos_player_x, pos_player_y))
-    
-    print(pontos)
     
     pygame.display.update()
