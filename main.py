@@ -123,7 +123,7 @@ while rodando:
         triggered = True
         vel_missil_x = 2
         
-    if pontos == -1:
+    if vida_player == 0:
         rodando = False
     
     # Respawn
@@ -140,8 +140,8 @@ while rodando:
     if pontos >= 3:
         screen.blit(boss, (pos_boss_x, pos_boss_y))
         
-            
-   # Alien Invisivel
+                
+    # Alien Invisivel
     if pontos >= 3:
         pos_alien_x = respawn_alien()[0]
         pos_alien_y = respawn_alien()[1]
